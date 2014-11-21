@@ -52,5 +52,6 @@ $route['maintenance/self-test'] = "maintenance/selftest";
 $route['maintenance/bed-calibration'] = "maintenance/bedcalibration";
 $route['maintenance/probe-calibration'] = "maintenance/probecalibration";
 $route['maintenance/first-setup'] = "maintenance/firstsetup";
+$route['maintenance/bed-scan'] = "maintenance/bedscan";
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */

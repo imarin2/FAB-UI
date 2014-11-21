@@ -109,6 +109,16 @@ class Maintenance extends Module {
 		
 		$this->layout->view('firstsetup/index', '');
 	}
+	
+	public function bedscan(){
+		
+		
+		
+		$js_in_page = $this->load->view('bedscan/js', '', TRUE);
+        $this->layout->add_js_in_page(array('data'=> $js_in_page, 'comment' => ''));
+		
+		$this->layout->view('bedscan/index', '');
+	}
 
 
 }
