@@ -1,8 +1,70 @@
 FAB-UI
-======
-
+=====
 the FABtotum User Interface Repo
 
+FABUI 0.7 (4/12/2014)
+
+SCAN
+- Fixed end scan procedure
+- Minor bugfixes
+	
+CREATE
+- Fixed wrong behavior of the wizard buttons after calling "Engage Feeder" procedure
+- Fixed additive print end procedure
+- Added Tips system during print. For example a tip message will appear if the print seems to start slowly
+- Fixed and improved some UI experience
+- Minor bugfixes
+
+MAINTENANCE
+- First Setup: fixed bug on bed leveling which prevented to continue with the wizard
+
+SETTINGS
+- General : added option (for experts users only) that permits to avoid safety front door lock (need firmware version 1.0.006)
+- Network : added ethernet static ip address configurator
+- Network : improved wifi network settings section. Avoided some ambiguous button behaviors
+
+PLUGIN
+Realeased first beta version of "Plugin" module. With this first version is possible to upload and install a plugin
+
+GENERAL
+- Minor bugfixes
+
+
+================================================== ================
+FABUI 0.655 (14/11/2014)
+
+- Fixed some missing plugins dependencies
+
+CREATE
+- added new feature to raise or lower the bed during printing (realtime z override)
+
+GENERAL
+- moved "maintenance" from settings as a single module with its own menu
+- added calibration wizard for the first setup
+- all plugins and frameworks of the ui updated to their latest version
+- added twitter and instagram feeds on login
+
+MAINTENANCE
+- bed calibration: Bug "140 turns" fixed
+- added "4 axis" to disengage the extruder manually
+
+JOG
+- manual: Improved mcode and gcode search
+
+SCAN
+- added memory optimization during rotative laserscanning
+- added dynamic z height correction during probing (drastically reduces probing times by adapting to the object height.)
+- corrected xy coordinates in the probing preparation menu
+
+PROFILE
+- added "pixels smash" theme skin
+- added "glass" theme skin
+- added new layouts: Fixed header - fixed navigation - fixed ribbon - fixed footer
+
+RECOVERY
+-[devs] added macro simulator to simulate actions from the macro python script
+-added "eth config" to manually change the dhcp server address in lan mode.
+================================================== ================
 
 FABUI 0.655 (14/11/2014)
 
