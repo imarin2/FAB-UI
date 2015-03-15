@@ -121,12 +121,12 @@
 		
 		$(".re-choice").slideUp('slow');
 		
-		var message = mode == 'prepare' ? 'Preparing calibration, please wait' : 'Calibrating';
+		var message = mode == 'prepare' ? 'Preparing calibration<br>Heating extruder and bed<br>This operation would take a while' : 'Calibrating<br>please wait';
 		
 		openWait(message);
 		$.ajax({
               type: "POST",
-              url: "<?php echo module_url("settings").'ajax/probe_setup.php' ?>",
+              url: "<?php echo module_url("maintenance").'ajax/probe_setup.php' ?>",
               data: { mode: mode},
               dataType: 'json',
               async: true
@@ -165,13 +165,36 @@
 		
 		var sign = $(this).attr('data-action');
 		var value = $("#z-value").val();
-		
 		var gcode = 'G0 Z' + sign + value;
 		
-		jog_make_call('mdi', gcode);
+		if(SOCKET_CONNECTED){
+			jog_make_call_ws('mdi', gcode);
+		}else{
+			jog_make_call('mdi', gcode);
+		}
 		
 		
 		
+	}
+	
+	
+	function jog_make_call_ws(func, value){
+		
+		var jsonData = {};
+		
+		jsonData['func']     = func;
+		jsonData['value']    = value;
+		jsonData['step']     = '';
+		jsonData['z_step']   = '';
+		jsonData['feedrate'] = '';
+		
+		var message = {};
+		
+		message['name'] = "serial";
+		message['data'] = jsonData;
+		
+		$(".btn").addClass('disabled');
+		SOCKET.send('message', JSON.stringify(message));
 		
 	}
 	
@@ -214,7 +237,7 @@
 			
 			$.ajax({
 				type: "POST",
-				url : "<?php echo module_url('settings').'ajax/probe_length.php' ?>",
+				url : "<?php echo module_url('maintenance').'ajax/probe_length.php' ?>",
 				dataType: "json"
 			}).done(function( data ) {
 		       
@@ -252,7 +275,7 @@
 		
 		$.ajax({
 				type: "POST",
-				url : "<?php echo module_url('settings').'ajax/override_probe_lenght.php' ?>",
+				url : "<?php echo module_url('maintenance').'ajax/override_probe_lenght.php' ?>",
 				dataType: "json",
 				data : {over : $("#over").val()}
 			}).done(function( data ) {

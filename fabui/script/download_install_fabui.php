@@ -1,8 +1,8 @@
 <?php
 /** FIRST DOWNLOAD FILE */
-require_once '/var/www/fabui/ajax/config.php';
-require_once FABUI_PATH.'ajax/lib/database.php';
-require_once FABUI_PATH.'ajax/lib/utilities.php';
+require_once '/var/www/lib/config.php';
+require_once '/var/www/lib/database.php';
+require_once '/var/www/lib/utilities.php';
 
 /** GET ARGS FROM COMMAND LINE */
 $_task_id = $argv[1];
@@ -190,7 +190,7 @@ if($do_update){
   
 
 }else{
-    echo "don't update".PHP_EOL;
+    echo "can't update this way".PHP_EOL;
 }
 
 
@@ -244,6 +244,7 @@ function extract_zip($source, $destination){
 	}
 	
 }
+
 
 
 

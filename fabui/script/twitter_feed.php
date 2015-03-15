@@ -1,25 +1,25 @@
 <?php
-require_once '/var/www/fabui/ajax/config.php';
-require_once '/var/www/fabui/ajax/lib/utilities.php';
+require_once '/var/www/lib/config.php';
+require_once '/var/www/lib/utilities.php';
 
 if (is_internet_avaiable()) {
+	
+	
+	
+	$ch = curl_init(TWITTER_FEED_URL);
 
-	// Create a stream
-	$opts = array('http' => array('method' => "GET"));
+	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-	$context = stream_context_create($opts);
+	$twitter_feed = curl_exec($ch);
+	$info = curl_getinfo($ch);
+	curl_close($ch);
 
-	$twitter_feed = file_get_contents(TWITTER_FEED_URL, false, $context);
-	$info_header = $http_response_header;
-
-	if ($info_header[0] == 'HTTP/1.1 200 OK') {
-
-		$fp = fopen(TWITTER_FEED_JSON, 'w');
-		fwrite($fp, $twitter_feed);
-		fclose($fp);
-
+	if ($info['http_code'] == 200) {
+		
+		write_file(TWITTER_FEED_JSON, $twitter_feed, 'w');
 	}
-
+	
 }
 ?>
 

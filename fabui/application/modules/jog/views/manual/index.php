@@ -26,13 +26,13 @@
 		        		<?php foreach($gcodes as $code): ?>
 		        			<tr class="code" data-attr="<?php echo $code['type'].$code['code']; ?>" >
 		        				<td width="150px;"><strong><?php echo $code['label']; ?></strong></td>
-		        				<td><?php echo $code['description']; ?></td>
+		        				<td><p class="description"><?php echo $code['description']; ?></p></td>
 		        			</tr>
 		        		<?php endforeach; ?>
 		        		<?php foreach($mcodes as $code): ?>
 		        			<tr class="code" data-attr="<?php echo $code['type'].$code['code']; ?>" >
 		        				<td width="150px;"><strong><?php echo $code['label']; ?></strong></td>
-		        				<td><?php echo $code['description']; ?></td>
+		        				<td><p class="description"><?php echo $code['description']; ?></p></td>
 		        			</tr>
 		        		<?php endforeach; ?>
 		        	</tbody>
@@ -46,11 +46,8 @@
 		Close
 	</button>
 <script type="text/javascript">
-	
-	
-	$(function() { 
-		
 
+	$(function() { 
 			$("#fa-icon-search").keyup(function() {
 				var search = $.trim(this.value);
 				
@@ -58,23 +55,28 @@
 					show_all();
 				}
 				else {
-					hide_divs(search.toUpperCase());
+					hide_divs(search.toLowerCase());
 				}
 			});
 			
 			
 			function hide_divs(search) {
 				
+				
 			    $(".code").hide(); 
 
 			    $(".code").each(function(index, value) {
 			    	
-			    	if(typeof $(this).attr('data-attr') !== typeof undefined && $(this).attr('data-attr') !== false){			    		
-			    		if($(this).attr('data-attr').indexOf(search) > -1 ){
+			    	if(typeof $(this).attr('data-attr') !== typeof undefined && $(this).attr('data-attr') !== false){
+			    		
+			    		var desc = $(this).find('.description').html().toLowerCase();
+			    		var attr = $(this).attr('data-attr');
+			    							    		
+			    		if((attr.indexOf(search) > -1) || (desc.indexOf(search) > -1)){
 			    			$(this).show();
 			    		}
 			    	}
-				    
+
 				});
 		}
 		

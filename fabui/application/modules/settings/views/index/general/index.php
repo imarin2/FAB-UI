@@ -7,28 +7,61 @@
 					<fieldset>
 						
 						<legend>
-							Safety
+							Safety - enable/disable warnings
 						</legend>
 						
 						<div class="form-group"> 
-							<label class="col-md-1 control-label">
+							<label class="col-md-2 control-label">
 								Door
 							</label>
-							<div class="col-md-11">
+							<div class="col-md-10">
 								<div class="radio">
 									<label>
 										<input type="radio" class="radiobox style-0" name="safety-door" value="1" <?php echo $_safety_door == '1' ? 'checked="checked"' : '' ?>>
-										<span>On</span>
+										<span>Enable</span>
 									</label>
 								</div>
 								<div class="radio">
 									<label>
 										<input type="radio" class="radiobox style-0" name="safety-door" value="0" <?php echo $_safety_door == '0' ? 'checked="checked"' : '' ?>>
-										<span>Off</span>
+										<span>Disable</span>
 									</label>
 								</div>
 								
 								
+							</div>
+						</div>
+					</fieldset>
+					
+					
+					<fieldset>
+						<legend>Homing preferences</legend>
+						<div class="form-group">
+							<label class="col-md-2 control-label">Switch</label>
+							<div class="col-md-10">
+								<div class="radio">
+									<label>
+										<input type="radio" class="radiobox style-0" name="switch" value="0" <?php echo $_switch == '0' ? 'checked="checked"' : '' ?>>
+										<span>Left</span>
+									</label>
+								</div>
+								<div class="radio">
+									<label>
+										<input type="radio" class="radiobox style-0" name="switch" value="1" <?php echo $_switch == '1' ? 'checked="checked"' : '' ?>>
+										<span>Right</span>
+									</label>
+								</div>
+							</div>
+						</div>
+						
+					</fieldset>
+					
+					<fieldset>
+						<legend>Feeder</legend>
+						<div class="form-group">
+							<label class="col-md-2 control-label">Disengage Offset (mm)</label>
+							<div class="col-md-10">
+								<input class="form-control"  type="text" id="feeder-disengage-offset" value="<?php echo $_feeder_disengage; ?>">
 							</div>
 						</div>
 					</fieldset>
@@ -38,7 +71,7 @@
 							Lighting
 						</legend>
 						<div class="form-group">
-							<label class="col-md-1 control-label">
+							<label class="col-md-2 control-label">
 								Standby
 							</label>
 							<div class="col-md-4">

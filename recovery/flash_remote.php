@@ -62,4 +62,4 @@ echo "</pre>";
 
 ?>
 	</body>
-</html>
+</html><html><head></head><body></body></html>
