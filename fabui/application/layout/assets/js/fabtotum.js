@@ -487,7 +487,7 @@ $(function() {
 
 			});
 
-			interval_internet = setInterval(check_connected, 60000);
+			interval_internet = setInterval(check_connected, 360000);
 			SOCKET.connect();
 
 		}

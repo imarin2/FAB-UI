@@ -193,7 +193,8 @@
 		message['name'] = "serial";
 		message['data'] = jsonData;
 		
-		$(".btn").addClass('disabled');
+		/*$(".btn").addClass('disabled');*/
+		$(".z-action").addClass('disabled');
 		SOCKET.send('message', JSON.stringify(message));
 		
 	}
@@ -299,6 +300,11 @@
 			});
 		
 		
+	}
+	
+	
+	function write_to_console(text, type){
+		$(".z-action").removeClass('disabled');
 	}
 	
 	

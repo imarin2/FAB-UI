@@ -8,7 +8,10 @@ from ws4py.client.threadedclient import WebSocketClient
 import serial
 import RPi.GPIO as GPIO
 import logging
+import os, sys
 
+
+monitorPID = os.getpid()
 
 config = ConfigParser.ConfigParser()
 config.read('/var/www/fabui/python/config.ini')
@@ -107,6 +110,7 @@ class MonitorHandler(PatternMatchingEventHandler):
         global task_notifications_file
         global macro_status_file
         global ws
+        global monitorPID
         
         if event.is_directory:
             return
@@ -155,8 +159,13 @@ class MonitorHandler(PatternMatchingEventHandler):
         self.catch_all(event, 'MOD')
             
     def sendMessage(self, messageType, data):
-        message = {'type': messageType, 'data':data}
-        ws.send(json.dumps(message))
+        try:
+            message = {'type': messageType, 'data':data}
+            ws.send(json.dumps(message))
+        except:
+            print "Unexpected error:", sys.exc_info()[0]
+            cmd = 'sudo php /var/www/fabui/script/kill_raise.php ' + str(monitorPID) + ' &'
+            os.system(cmd)
         
 
 

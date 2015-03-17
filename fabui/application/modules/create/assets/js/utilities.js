@@ -503,6 +503,8 @@ function print_object() {
 			time : timestamp
 		}
 	}).done(function(response) {
+		
+		console.log(response);
 
 		if (response.response == true) {
 

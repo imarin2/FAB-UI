@@ -64,7 +64,7 @@ if($_print_type ==  'additive'){
 		
 		
 		/** CHECK MACRO RESPONSE */
-		if(str_replace(PHP_EOL, file_get_contents($_macro_response)) != 'true'){
+		if(str_replace(PHP_EOL, '', file_get_contents($_macro_response)) != 'true'){
 			header('Content-Type: application/json');
 			echo json_encode(array('response' => false, 'message' => str_replace(PHP_EOL, '<br>', file_get_contents($_macro_trace)), 'response_text' => file_get_contents($_macro_response)));
 			exit();
@@ -74,10 +74,6 @@ if($_print_type ==  'additive'){
 	
 	
 	file_put_contents($_macro_response, '');
-	
-	
-	
-	
 	
 	
 	$_command_start_print_macro  = 'sudo python '.PYTHON_PATH.'gmacro.py start_print '.$_macro_trace.' '.$_macro_response;
