@@ -10,6 +10,8 @@ import RPi.GPIO as GPIO
 import logging
 import os, sys
 
+from subprocess import call
+
 
 monitorPID = os.getpid()
 
@@ -85,10 +87,16 @@ def safety_callback(channel):
             #to do
             type=""
             code=""
-                
-        message = {'type': str(type), 'code': str(code)}
+
+	if (type=="emergency" and int(code)==120):
+		print "calling"
+		call (['sudo php /var/www/fabui/application/modules/controller/ajax/shutdown.php'], shell=True)
+
+        message = {'type': str(type), 'code': str(code)}		
+
         ws.send(json.dumps(message))
         write_emergency(json.dumps(message))
+
         
     except Exception, e:
         logging.info(str(e))
