@@ -241,11 +241,7 @@ function safety() {
 	if (EMERGENCY == false) {
 		$.get("/temp/fab_ui_safety.json?time=" + jQuery.now(), function(data) {
 			if (data.type == 'emergency') {	
-                                //show_emergency(data.code);
-                                if(parseInt(data.code)!=120)
-                                        show_emergency(data.code);
-                                else
-                                        shutdown();
+                        	show_emergency(data.code);
 			}
 		});
 	}
@@ -418,11 +414,7 @@ $(function() {
 				switch(obj.type) {
 					
 				case 'emergency':
-                                       	//show_emergency(obj.code);
-                                        if(parseInt(obj.code)!=120)
-                                        	show_emergency(obj.code);
-                                        else
-                                                shutdown();
+                                       	show_emergency(obj.code);
 					break;
 				case 'security':
 					EMERGENCY = false;
