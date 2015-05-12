@@ -38,8 +38,6 @@ class Settings extends Module {
 		$data['_both_y_endstops'] = isset($_units['bothy']) ? $_units['bothy']: "None";
 		$data['_both_z_endstops'] = isset($_units['bothz']) ? $_units['bothz']: "None";
 
-		$data['_upload_api_key'] = isset($_units['api']['key']) ? $_units['api']['key']: '';
-        
         /** LOAD TAB HEADER */
         $_tab_header = $this->tab_header();
         
