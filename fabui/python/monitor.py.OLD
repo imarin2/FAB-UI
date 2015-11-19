@@ -1,0 +1,59 @@
+import time
+from watchdog.observers import Observer
+from watchdog.events import PatternMatchingEventHandler
+import ConfigParser
+import json
+from ws4py.client.threadedclient import WebSocketClient
+
+config = ConfigParser.ConfigParser()
+config.read('/var/www/fabui/python/config.ini')
+
+status_file=config.get('macro', 'status_file')
+trace_file=config.get('macro', 'trace_file')
+
+active=False
+
+class MyHandler(PatternMatchingEventHandler):
+        
+    def catch_all(self, event, op):
+        global active
+        
+        if event.is_directory:
+            return
+        if(event.src_path == status_file):
+            json_status = open(status_file)
+            status = json.load(json_status)
+            active=status['status']
+            print active
+    
+    
+    def on_modified(self, event):
+        self.catch_all(event, 'MOD')
+        
+
+
+event_handler = MyHandler(patterns=[config.get('macro', 'status_file')])
+#event_handler = MyHandler()
+observer = Observer()
+observer.schedule(event_handler, '/var/www/temp/', recursive=False)
+observer.start()
+
+
+#websocket
+host=config.get('socket', 'host')
+port=config.get('socket', 'port')
+
+ws = WebSocketClient('ws://'+host +':'+port+'/', protocols=['http-only', 'chat'])
+ws.connect();
+
+try:
+    while True:
+        if(active):
+            content= open(trace_file, 'r').read()
+            message = {'type': 'monitor', 'data': str(content)}
+            ws.send(json.dumps(message))
+    time.sleep(0.5)
+except KeyboardInterrupt:
+    observer.stop()
+observer.join()
+    

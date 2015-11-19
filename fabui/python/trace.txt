@@ -1,0 +1,36 @@
+Manual Bed Calibration Wizard Initiated
+Homing Z - Fast
+Setting abs mode: Failed (<nothing>)
+Setting correct Z: Skipped
+Retracting Probe (safety): Skipped
+Moving to start Z height: Skipped
+Moving to Pos: Skipped
+Lowering Probe: Skipped
+Probe failed on this point
+Rising Bed: Skipped
+Lowering Probe: Skipped
+Probe failed on this point
+Rising Bed: Skipped
+Lowering Probe: Skipped
+Probe failed on this point
+Rising Bed: Skipped
+Lowering Probe: Skipped
+Probe failed on this point
+Rising Bed: Skipped
+Raising Probe: Skipped
+Rising Bed: Skipped
+Moving to Pos: Skipped
+Lowering Probe: Skipped
+Manual Bed Calibration Wizard Initiated
+Homing Z - Fast
+Moving to start Z height
+Manual Bed Calibration Wizard Initiated
+Homing Z - Fast
+Moving to start Z height
+Equation of the plane: 
+ -0.000114649465008x +-0.00056696285391y + 0.999999832704z =-37.48075
+-37.48075-37.4877546028 = -0.00700460280343
+-37.48075-37.3417616435 = 0.138988356502
+-37.48075-37.3161948085 = 0.164555191477
+-37.48075-37.4621877678 = 0.0185622321706
+Done!
