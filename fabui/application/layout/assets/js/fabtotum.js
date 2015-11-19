@@ -1,3 +1,35 @@
+var smartbgimage = "<h6 class='margin-top-10 semi-bold'>Background</h6><img src='img/pattern/graphy-xs.png' data-htmlbg-url='img/pattern/graphy.png' width='22' height='22' class='margin-right-5 bordered cursor-pointer'><img src='img/pattern/tileable_wood_texture-xs.png' width='22' height='22' data-htmlbg-url='img/pattern/tileable_wood_texture.png' class='margin-right-5 bordered cursor-pointer'><img src='img/pattern/sneaker_mesh_fabric-xs.png' width='22' height='22' data-htmlbg-url='img/pattern/sneaker_mesh_fabric.png' class='margin-right-5 bordered cursor-pointer'><img src='img/pattern/nistri-xs.png' data-htmlbg-url='img/pattern/nistri.png' width='22' height='22' class='margin-right-5 bordered cursor-pointer'><img src='img/pattern/paper-xs.png' data-htmlbg-url='img/pattern/paper.png' width='22' height='22' class='bordered cursor-pointer'>";
+$("#smart-bgimages").fadeOut(), $("#demo-setting").click(function() {
+    $(".demo").toggleClass("activate")
+}), $('input[type="checkbox"]#smart-fixed-header').click(function() {
+    $(this).is(":checked") ? $.root_.addClass("fixed-header") : ($('input[type="checkbox"]#smart-fixed-ribbon').prop("checked", !1), $('input[type="checkbox"]#smart-fixed-navigation').prop("checked", !1), $.root_.removeClass("fixed-header"), $.root_.removeClass("fixed-navigation"), $.root_.removeClass("fixed-ribbon"))
+}), $('input[type="checkbox"]#smart-fixed-navigation').click(function() {
+    $(this).is(":checked") ? ($('input[type="checkbox"]#smart-fixed-header').prop("checked", !0), $.root_.addClass("fixed-header"), $.root_.addClass("fixed-navigation"), $('input[type="checkbox"]#smart-fixed-container').prop("checked", !1), $.root_.removeClass("container")) : ($('input[type="checkbox"]#smart-fixed-ribbon').prop("checked", !1), $.root_.removeClass("fixed-navigation"), $.root_.removeClass("fixed-ribbon"))
+}), $('input[type="checkbox"]#smart-fixed-ribbon').click(function() {
+    $(this).is(":checked") ? ($('input[type="checkbox"]#smart-fixed-header').prop("checked", !0), $('input[type="checkbox"]#smart-fixed-navigation').prop("checked", !0), $('input[type="checkbox"]#smart-fixed-ribbon').prop("checked", !0), $.root_.addClass("fixed-header"), $.root_.addClass("fixed-navigation"), $.root_.addClass("fixed-ribbon"), $('input[type="checkbox"]#smart-fixed-container').prop("checked", !1), $.root_.removeClass("container")) : $.root_.removeClass("fixed-ribbon")
+}), $('input[type="checkbox"]#smart-fixed-footer').click(function() {
+    $(this).is(":checked") ? $.root_.addClass("fixed-page-footer") : $.root_.removeClass("fixed-page-footer")
+}), $('input[type="checkbox"]#smart-rtl').click(function() {
+    $(this).is(":checked") ? $.root_.addClass("smart-rtl") : $.root_.removeClass("smart-rtl")
+}), $('input[type="checkbox"]#smart-top-menu').click(function() {
+	$(this).is(":checked") ? $.root_.addClass("menu-on-top") : $.root_.removeClass("menu-on-top")
+}), "top" == localStorage.getItem("sm-setmenu") ? $("#smart-topmenu").prop("checked", !0) : $("#smart-topmenu").prop("checked", !1), $('input[type="checkbox"]#colorblind-friendly').click(function() {
+    $(this).is(":checked") ? $.root_.addClass("colorblind-friendly") : $.root_.removeClass("colorblind-friendly")
+}), $('input[type="checkbox"]#smart-fixed-container').click(function() {
+    $(this).is(":checked") ? ($.root_.addClass("container"), $('input[type="checkbox"]#smart-fixed-ribbon').prop("checked", !1), $.root_.removeClass("fixed-ribbon"), $('input[type="checkbox"]#smart-fixed-navigation').prop("checked", !1), $.root_.removeClass("fixed-navigation"), smartbgimage ? ($("#smart-bgimages").append(smartbgimage).fadeIn(1e3), $("#smart-bgimages img").bind("click", function() {
+        var e = $(this),
+            t = $("html");
+        bgurl = e.data("htmlbg-url"), t.css("background-image", "url(" + bgurl + ")")
+    }), smartbgimage = null) : $("#smart-bgimages").fadeIn(1e3)) : ($.root_.removeClass("container"), $("#smart-bgimages").fadeOut())
+}), $("#reset-smart-widget").bind("click", function() {
+    return $("#refresh").click(), !1
+}), $("#smart-styles > a").on("click", function() {
+    var e = $(this),
+        t = $("#logo img");
+    $.root_.removeClassPrefix("smart-style").addClass(e.attr("id")), t.attr("src", e.data("skinlogo")), $("#smart-styles > a #skin-checked").remove(), e.prepend("<i class='fa fa-check fa-fw' id='skin-checked'></i>")
+})
+
+
 function number_format(number, decimals, dec_point, thousands_sep) {
 
 	number = (number + '').replace(/[^0-9+\-Ee.]/g, '');
@@ -136,8 +168,14 @@ function openWait(title, content, spinner) {
 		$(".wait-content").html('');
 		$(".wait-content").remove();
 	}
-
+	
 	var src_html = '<div class="white-popup animated bounceIn fast">';
+	
+	if(!pressedEmergencyButton){
+		src_html += '<a href="#" class="btn btn-default pull-right" data-action="emergencyButton"><i class="fa fa-times-circle txt-color-red"></i></a>';
+	}
+	
+	
 	src_html += '<h6 class="text-align-center wait-title">' + title + ' </h6>';
 
 	if (spinner == true) {
@@ -219,15 +257,24 @@ var notifications_interval;
 var safety_interval;
 var tasks_interval;
 var EMERGENCY = false;
-var idleTime = 0;
+var IDLETIME = 0;
 var idleInterval;
 var do_system_call = true;
 var SOCKET;
 var SOCKET_CONNECTED = false;
 var interval_internet;
+var jogFirstEntry = true;
+var PAGE_ACTIVE = true;
+var PAGE_TITLE = '';
+var RESETTING_CONTROLLER = false;
+var STOPPING_ALL = false;
 
 /** CHECK PRINTE SAFETY AJAX MODE*/
 function safety() {
+	
+	if(!PAGE_ACTIVE){
+		return false;
+	}
 
 	if (!do_system_call) {
 		return false;
@@ -240,16 +287,14 @@ function safety() {
 	var timestamp = new Date().getTime();
 	if (EMERGENCY == false) {
 		$.get("/temp/fab_ui_safety.json?time=" + jQuery.now(), function(data) {
-			if (data.type == 'emergency') {	
-                        	show_emergency(data.code);
+			if (data.type == 'emergency') {
+				show_emergency(data.code);
 			}
 		});
 	}
 }
 
 function secure(mode) {
-	
-	
 	
 	if(SOCKET_CONNECTED){
 		SOCKET.send('message', '{"name": "secure", "data":{"mode":'+ mode +' } }');
@@ -319,10 +364,10 @@ function update_notifications() {
 
 	if (total > 0) {
 		$("#activity").find('.badge').addClass('bg-color-red bounceIn animated');
-		document.title = 'FAB UI beta (' + total + ')';
+		document.title = PAGE_TITLE +' (' + total + ')';
 	} else {
 		$("#activity").find('.badge').removeClass('bg-color-red bounceIn animated');
-		document.title = 'FAB UI beta';
+		document.title = PAGE_TITLE;
 	}
 
 	if (number_tasks == 0) {
@@ -335,7 +380,11 @@ function update_notifications() {
 }
 
 function refresh_notifications() {
-
+	
+	if(!PAGE_ACTIVE){
+		return false;
+	}
+	
 	if (!do_system_call) {
 		return false;
 	}
@@ -352,7 +401,11 @@ function refresh_notifications() {
 
 /** CHECK TASKS, MENU AJAX MODE */
 function check_notifications() {
-
+	
+	if(!PAGE_ACTIVE){
+		return false;
+	}
+	
 	if (!do_system_call) {
 		return false;
 	}
@@ -361,7 +414,7 @@ function check_notifications() {
 		return false;
 	}
 
-	if (idleTime < max_idle_time || max_idle_time == 0) {
+	if (IDLETIME < max_idle_time || max_idle_time == 0) {
 		var timestamp = new Date().getTime();
 		$.ajax({
 			type : "POST",
@@ -390,6 +443,9 @@ function check_notifications() {
 /** ON LOAD */
 
 $(function() {
+	
+	
+	PAGE_TITLE = document.title;
 
 	if (fabui) {
 
@@ -401,7 +457,7 @@ $(function() {
 			var port = 9001;
 
 			SOCKET = new FabWebSocket(host, port);
-
+			
 			SOCKET.bind('message', function(payload) {
 
 				try {
@@ -414,7 +470,11 @@ $(function() {
 				switch(obj.type) {
 					
 				case 'emergency':
-                                       	show_emergency(obj.code);
+					show_emergency(obj.code);
+					break;
+				case 'alert':
+					show_alert(obj.code);
+					//show_emergency(obj.code);
 					break;
 				case 'security':
 					EMERGENCY = false;
@@ -459,6 +519,9 @@ $(function() {
 					
 				case 'system':
 					manage_system_monitor(obj.data);
+					break;
+				case 'post_processing':
+					manage_post_processing(obj.data);
 					break;
 				
 				}
@@ -530,12 +593,12 @@ $(".language").click(function() {
 
 /** MOUSE MOVE FOR LOCK SCREEN */
 $(document).mousemove(function(e) {
-	idleTime = 0;
+	IDLETIME = 0;
 });
 
 /** IDLE TIMER */
 function timerIncrement() {
-	idleTime++;
+	IDLETIME++;	
 }
 
 /** SHUTDOWN */
@@ -553,15 +616,49 @@ function shutdown() {
 	}).done(function(response) {
 
 		setTimeout(function() {
-
+			
+			
+			
 			$(".wait-spinner").remove();
 			waitTitle('Now you can switch off the power');
 			waitContent($("#power-off-img").html());
 
-		}, 5000);
+		}, 12000);
 
 	});
 }
+
+
+function restart(){
+	
+	openWait("Restart in progress");
+	
+	clearInterval(notifications_interval);
+	clearInterval(safety_interval);
+	clearInterval(idleInterval);
+	
+	
+	$.ajax({
+		type : "POST",
+		url : "/fabui/application/modules/controller/ajax/restart.php",
+		dataType : 'json'
+	}).done(function(response) {
+		
+		waitContent("Restarting please wait...");
+		
+		setTimeout(function() {
+			
+			document.location.href = '/fabui/login/out';
+
+		}, 70000);
+		
+
+	});
+	
+	
+}
+
+
 
 /** SHUTDOWN */
 function check_for_updates() {
@@ -742,13 +839,14 @@ function getTrace(url, type, contenitor) {
 
 ////////////////////////
 function show_emergency(code) {
-
+		
+	jogFirstEntry = true;
+	
 	if (EMERGENCY == true) {
 		return;
 	}
-
 	EMERGENCY = true;
-
+	
 	$.SmartMessageBox({
 		title : "<h4><span class='txt-color-orangeDark'><i class='fa fa-warning fa-2x'></i></span>&nbsp;&nbsp;" + decode_emergency_code(code) + "<br>&nbsp;Press OK to continue or Ignore to disable this warning</h4>",
 		buttons : '[OK][IGNORE]'
@@ -762,6 +860,21 @@ function show_emergency(code) {
 	});
 
 }
+
+function show_alert(code){
+	
+	$.smallBox({
+		title : "Message",
+		content : decode_emergency_code(code),
+		color : "#5384AF",
+		timeout: 10000,
+		icon : "fa fa-warning"
+	});
+	
+	
+	console.log(code);
+}
+
 
 function decode_emergency_code(code) {
 
@@ -796,21 +909,22 @@ function decode_emergency_code(code) {
 	case 109:
 		return 'Y min Endstop hit';
 		break;
-
+	case 110:
+		return 'The FABtotum has been idling for more than 8 minutes. Temperatures and Motors have been turned off.';
+		break;
 	case 120:
 		return 'Both Y Endstops hit at the same time';
 		break;
-
 	case 121:
 		return 'Both Z Endstops hit at the same time';
 		break;
-
 	default:
 		return 'Unknown error Error code: ' + code;
 		break;
 	}
 
 }
+
 
 function show_connected(bool) {
 	if (bool) {
@@ -821,7 +935,9 @@ function show_connected(bool) {
 }
 
 function check_connected() {
-	if (SOCKET_CONNECTED) {
+	
+	
+	if (SOCKET_CONNECTED && PAGE_ACTIVE) {
 		SOCKET.send('message', '{"name": "getInternet"}');
 	}
 }
@@ -834,6 +950,7 @@ function socket_fallback() {
 }
 
 function write_to_console(text, type) {
+	
 
 	type = type || '';
 
@@ -889,6 +1006,10 @@ function manage_system_monitor(obj){
 }
 
 
+function manage_post_processing(obj){
+	
+}
+
 function mange_usb_monitor(status, alert){
 	
 	var message = '<p><strong>';
@@ -913,8 +1034,94 @@ function mange_usb_monitor(status, alert){
 			icon : "icon-fab-usb"
 		});
 	}
-
-	
-	
-	
 }
+
+
+function reset_controller(){
+		
+		RESETTING_CONTROLLER = true;
+		
+		openWait("Reset Controller...");
+	    $.ajax({
+	      	url : '/fabui/application/modules/controller/ajax/reset_controller.php',
+		  	dataType : 'json',
+		 	type: 'post'
+		}).done(function(response) {
+			closeWait();
+			RESETTING_CONTROLLER = false; 
+	    });
+}
+
+
+
+function stopAll(){
+	
+	openWait("Stopping all...");
+	
+	STOPPING_ALL = true;
+	
+	$.ajax({
+	      	url : '/fabui/application/modules/controller/ajax/stop_all.php',
+		  	dataType : 'json',
+		 	type: 'post',
+		 	data : {'module': MODULE}
+		}).done(function(response) {
+			
+			/*$.xhrPool.abortAll();*/
+			waitContent("Refreshing page");
+			STOPPING_ALL = false;
+			document.location.href = document.location.href; 
+	    });
+}
+
+
+$(window).on("blur focus", function(e) {
+	
+    var prevType = $(this).data("prevType");
+
+    if (prevType != e.type) {
+        switch (e.type) {
+            case "blur":
+                PAGE_ACTIVE = false;
+                //document.title = document.title + ' (idle)';
+                break;
+            case "focus":
+                PAGE_ACTIVE = true;
+                //document.title = document.title.replace('(idle)', '');
+                break;
+        }
+    }
+    
+        
+    $(this).data("prevType", e.type);
+    
+    
+    
+    
+    
+});
+
+
+$.xhrPool = [];
+$.xhrPool.abortAll = function(url) {
+    $(this).each(function(i, jqXHR) { //  cycle through list of recorded connection
+        console.log('xhrPool.abortAll ' + jqXHR.requestURL);
+        //if (!url || url === jqXHR.requestURL) {
+            jqXHR.abort(); //  aborts connection
+            $.xhrPool.splice(i, 1); //  removes from list by index
+        //}
+    });
+};
+$.ajaxSetup({
+    beforeSend: function(jqXHR) {
+        $.xhrPool.push(jqXHR); //  add connection to list
+    },
+    complete: function(jqXHR) {
+        var i = $.xhrPool.indexOf(jqXHR); //  get index for current connection completed
+        if (i > -1) $.xhrPool.splice(i, 1); //  soremoves from list by index
+    }
+});
+$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+    jqXHR.requestURL = options.url;
+});
+

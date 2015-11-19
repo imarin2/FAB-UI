@@ -20,7 +20,12 @@ $_status        = isset($argv[3]) && $argv[3] != '' ? $argv[3] : 'performed';
 //$_g_pusher_type = isset($argv[4]) && $argv[4] != '' ? $argv[4] : 'fast';
 
 
-
+/*
+echo "FINALIZE".PHP_EOL;
+echo $_task_id.PHP_EOL;
+echo $_type.PHP_EOL;
+echo $_status.PHP_EOL;
+*/
 
 switch($_type){
 
@@ -42,6 +47,7 @@ switch($_type){
 	case 'scan_r':
 	case 'scan_p':
 	case 'scan_s':
+	case 'scan_pg':
 	case 'scan':
 		finalize_scan($_task_id, $_type, $_status);
 		break;		
@@ -110,7 +116,10 @@ function finalize_print($tid, $status){
 	//GET TASK ATTRIBUTES
 	$attributes = json_decode($task['attributes'], TRUE);
 	
-	if($status == 'stopped'){
+	$print_type = $attributes['print_type'];
+	
+	
+	if($status == 'stopped' && $print_type == 'additive'){
 		
 		//IF % PROGRESS IS < 0.5 FOR SECURITY REASON I RESET THE BOARD CONTROLLER
 		$monitor = json_decode(file_get_contents($attributes['monitor']), TRUE);
@@ -207,7 +216,13 @@ function finalize_print($tid, $status){
 	//WAIT FOR THE UI TO FINALIZE THE PROCESS
 	//sleep(7);
 	//REMOVE ALL TEMPORARY FILES
-	shell_exec('sudo rm -rf '.$attributes['folder']); 
+	shell_exec('sudo rm -rf '.$attributes['folder']);
+	
+	if($reset){
+			
+		sleep(2);
+		include '/var/www/fabui/script/boot.php';
+	} 
 	
 	//$log->info('Task #'.$tid.' end finalizing');
 	
@@ -528,7 +543,7 @@ function finalize_general($tid,$type,$status){
 	
 	
 	
-	if($type == 'scan_r' || $type == 'scan_p' || $type="scan_s" ){
+	if($type == 'scan_r' || $type == 'scan_p' || $type=="scan_s" ){
 		
 		
 		sleep(5);
@@ -587,12 +602,10 @@ function finalize_general($tid,$type,$status){
 	    $_data_update['attributes'] = json_encode($attributes);
 	    $db->update('sys_tasks', array('column' => 'id', 'value' => $tid, 'sign' => '='), $_data_update);
 	    $db->close();
-		
-		
+	
 		
 	}
 		
-	
 	
 	// EXEC MACRO END_SCAN
 	

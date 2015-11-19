@@ -1,1 +1,1 @@
-{"x":1,"y":1,"z":1,"e":"532","a":177.777778,"color":{"r":"255","g":"255","b":"255"},"safety":{"door":"1"},"switch":"0","feeder":{"disengage-offset":"2"},"bothy":"Shutdown","bothz":"None"}
+{"x":1,"y":1,"z":1,"e":3048.1593,"a":177.777778,"color":{"r":"255","g":"255","b":"255"},"safety":{"door":"1"},"switch":"1","feeder":{"disengage-offset":"2","show":true},"bothy":"Shutdown","bothz":"None","api":{"keys":{"1":"OtoS5m3S2Z06A9qc"}},"hardware":{"id":1},"settings_type":"custom","zprobe":{"disable":"0","zmax":"206"}}

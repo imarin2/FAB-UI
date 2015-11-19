@@ -1,45 +1,27 @@
-import re
-''' 
-ncfile="/var/www/upload/gcode/Marvin_KeyChain_FABtotum.gcode"
+import time
+from watchdog.observers import Observer
+from watchdog.events import PatternMatchingEventHandler
+from watchdog.events import FileSystemEventHandler
+import ConfigParser
+import json
+from ws4py.client.threadedclient import WebSocketClient
+import serial
+import RPi.GPIO as GPIO
+import logging
+import os, sys
 
-z=""
+config = ConfigParser.ConfigParser()
+config.read('/var/www/fabui/python/config.ini')
 
-for line in reversed(open(ncfile).readlines()):
-    
-    temp = line.strip()
-    
-    
-    #m = re.search("Z[+-]?([0-9]+\.([0-9]+)?|\.[0-9]+)([eE][+-]?[0-9]+)?", temp)
-    m = re.search("G[0-1] Z\d*\.?\d+", temp)
-    if m:
-        print m.group(0)
-        break;
-    
-   
-    if temp[0:4] == "G1 Z" or temp[0:4] == "G1 Z":
-        z=temp
-        break
-    
-z = z.split()
-
-z = z[1]
-
-
-print z.replace('Z', '');
-'''
+'''### READ PRINTER SETTINGS ###'''
+json_f = open(config.get('printer', 'settings_file'))
+units = json.load(json_f)
 
 
 
-def getLayers(file):
-    layers=0
-    for line in reversed(open(file).readlines()):
-        match = re.search("G[0-1] Z\d*\.?\d+", line.strip())
-        if match:
-            temp = match.group().split()
-            layers=temp[1].replace("Z", "")
-            break
-    return float(layers)*10
-            
-            
-ncfile="/var/www/upload/gcode/Marvin_KeyChain_FABtotum.gcode"
-print getLayers(ncfile)    
+print units
+
+if 'bothy' in units and units['bothy']:
+    print "exists"
+else:
+    print "doesnt exists"

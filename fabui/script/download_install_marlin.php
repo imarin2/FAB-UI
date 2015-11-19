@@ -13,7 +13,6 @@ $_monitor = $argv[3];
 $_marlin_local_version   = marlin_get_local_version();
 $_marlin_remote_version  = marlin_get_remote_version();
 
-
 $_file_name = $_folder.MARLIN_DOWNLOAD_FILE;
 $_url       = MARLIN_DOWNLOAD_URL.$_marlin_remote_version.'/'.MARLIN_DOWNLOAD_FILE;
 
@@ -83,6 +82,11 @@ if($do_update){
 	
    	$_command = 'sudo /usr/bin/avrdude -D -q -V -p atmega1280 -C /etc/avrdude.conf -c arduino -b 57600 -P  /dev/ttyAMA0 -U flash:w:'.$_file_name.':i > '.$log;
     shell_exec($_command);
+	
+	sleep(1);
+	
+	//boot
+	include '/var/www/fabui/script/boot.php';
 		
 	/** UPDATE VERSION  */
 	/** LOAD DB */

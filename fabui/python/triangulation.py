@@ -5,6 +5,18 @@ from subprocess import call
 import datetime,time
 from os import path, access, R_OK
 import math
+from ws4py.client.threadedclient import WebSocketClient
+import ConfigParser
+import json
+
+config = ConfigParser.ConfigParser()
+config.read('/var/www/fabui/python/config.ini')
+
+'''#### WEB SOCKET CLIENT ####'''
+host=config.get('socket', 'host')
+port=config.get('socket', 'port')
+ws = WebSocketClient('ws://'+host +':'+port+'/')
+ws.connect();
 
 #defaults:
 scan_dir='/var/www/camera/scan_temp/'  	#default dir
@@ -37,9 +49,27 @@ fail=0
 usage="python triangulate.py -i[input_folder] -o[output_file] -s[slices] -b[start] -e[end] -w[width of image] -h[height of image] -z[z scan offset] -a[a scan offset] -m[mode r or s] -l[json tracking log file] -t[task ID] -d[debug]"
 
 def printlog(percent,num):		
-	str_log='{"post_processing":{"name": "'+name+'","pid": "'+str(myPID)+'","started": "'+str(t0)+'","completed": "'+str(completed)+'","completed_time": "'+str(completed_time)+'","stats":{"percent":"'+str(percent)+'","img_number":'+str(cs)+',"tot_images":'+str(slices)+'}}}'
+	
+	global ws
+	global host
+	global port
+	
+	stats = {'percent': str(percent), 'img_number': str(cs), 'tot_images': str(slices)}
+	post_processing = {'name':  name, 'pid' : str(myPID), 'started': str(t0), 'completed': str(completed), 'completed_time': str(completed_time), 'stats': stats}
+	str_log = {'post_processing': post_processing}
+	#str_log='{"post_processing":{"name": "'+name+'","pid": "'+str(myPID)+'","started": "'+str(t0)+'","completed": "'+str(completed)+'","completed_time": "'+str(completed_time)+'","stats":{"percent":"'+str(percent)+'","img_number":'+str(cs)+',"tot_images":'+str(slices)+'}}}'
+	message = {'type': 'post_processing', 'data': str_log}
+	
+	try:
+		ws.send(json.dumps(message))
+	except Exception, e:
+		print str(e)
+		ws = WebSocketClient('ws://'+host +':'+port+'/')
+		ws.connect();
+	
 	handle=open(logfile,'w')
-	print>>handle, str_log
+	print>>handle, json.dumps(str_log)
+	handle.close()
 	return
 	
 def rotate_y_axis(point,angle):
@@ -59,9 +89,7 @@ def convert_cloud(points):
 	cloud_file = open(output_file,"a")
 	if len(points)>4:
 		for row in range(0,len(points)-1):
-			#point_str=str(points[row][0]), "," , str(points[row][1]) , "," , str(points[row][2])
 			cloud_file.write(str(points[row][0]) + ',' + str(points[row][1]) + ',' + str(points[row][2]) + '\n')
-            #cloud_file.write(str(point_str) + '\n') 
 	cloud_file.close()
 	return 
 	
@@ -125,22 +153,15 @@ for opt, arg in opts:
 	elif opt in ("-d", "--d"):
 		debug = 1
  
+#force debug
+debug=1
+
 #IMAGE PROCESSING SETTINGS
 mmpph=6.0							#mm per pixel height
-mmppl=6.111							#mm per pixel lenght 
+mmppl=6.0							#mm per pixel lenght 
 
 tresh=40							#noise treshold for difference operation (usually 10-45 works) lowest than tresh gets deleted.	
-subrange=30							#analysis subrange.lower values are faster but less reliable, usually 10-15 is fine with 200/255 PWM laser
-
-#Params for HSV thresholding
-hue_min=228
-hue_max=255
-
-sat_min=30
-sat_max=100
-
-val_min=30
-val_max=100
+subrange=15							#analysis subrange.lower values are faster but less reliable, usually 10-15 is fine with 200/255 PWM laser
 
 channels = {'hue': None,'saturation': None,'value': None,'laser': None,}
 
@@ -168,8 +189,8 @@ if debug:
 
 	
 while (cs < slices) :
-		filename=scan_dir +str(cs) + '.png'
-		filename_l=scan_dir +str(cs) + '_l.png'
+		filename=scan_dir +str(cs) + '.jpg'
+		filename_l=scan_dir +str(cs) + '_l.jpg'
 
 		#wait for the file to exist and be writeable + written (also, for real time processing!)
 		img_l=None
@@ -211,7 +232,7 @@ while (cs < slices) :
 			tresh_difference = cv2.cvtColor(or_difference, cv.CV_BGR2GRAY)
 			maxval=tresh_difference.max()
 			#print maxval
-			tresh= int(maxval*0.6)		 #use 60% of max value as a treshold
+			tresh= int(maxval*0.4)		 #use 40% of max value as a treshold
 			if debug:
 				print "Dynamic Treshold :" , tresh			
 			
@@ -220,32 +241,13 @@ while (cs < slices) :
 		ret,difference = cv2.threshold(or_difference,tresh,255,cv2.THRESH_TOZERO)
 				
 		#Create enhanced view of the Laser line
-		#hsv_img = cv2.cvtColor(difference, cv.CV_BGR2HSV)
 		difference = cv2.cvtColor(difference, cv.CV_BGR2GRAY)
-		
-		# split into color channels
-		##h, s, v = cv2.split(hsv_img)
-
-		##channels['hue'] = h
-		##channels['saturation'] = s
-		##channels['value'] = v
-		
-		# Threshold the HSV img
-		##threshold_image("hue") #not needed right now
-		##threshold_image("saturation")
-		##threshold_image("value")
-
-		#Getting the laser line
-		##channels['laser'] = cv2.bitwise_and(channels['saturation'],channels['value'])
-
-		#increasing precision by merging the Laser with Saturation (gives thinner line and bigger smooth subdomain)
-		#difference = cv2.bitwise_and(channels['laser'],s)
 
 		#max values for each column
 		ind=difference.argmax(axis=0)
 			
 		#declare empty position array for post process.
-		line_pos=np.zeros(img_height,dtype=np.int)
+		line_pos=np.zeros(img_height,dtype=np.float)
 		
 		for col,value in enumerate(ind):
 			if(value>0): #if column has a point to process. otherwise skip to next
@@ -295,7 +297,7 @@ while (cs < slices) :
 		#END COL CYCLE: IMAGE ANALYZED.
 		
 		if debug:
-			print "failed subdomains :" + str(fail)
+			print "Failed subdomains :" + str(fail)
 		fail=0
 		
 		# post process pixel postions with local STD (to uniform line)
@@ -346,11 +348,10 @@ while (cs < slices) :
 				
 			#------------------RECONSTRUCTION----------------------------
 			#-------Calculate XYZ coordinates for cloud points-----------						
-			#-------for reference: wiki.fabtotum.cc
 			
 			if reconstruct_mode=="r":
 				#ROTATIVE laser_scan reconstruction
-				a_deg=float((cs*(end-start)/slices)*math.pi/180)				#degrees for each shot in radiants
+				a_deg=-((float(cs*(end-start))/slices)*math.pi/180)				#+=CCW,degrees/shot in radiants
 				app_distance=float(abs((img_width/2)-line_pos[col])/mmppl)		#apparent distance in pixels *mm per pixels
 				ro=float(app_distance*tri_side)
 				x=float(ro*(np.cos(a_deg)))               						#switching to cartesian
@@ -387,11 +388,13 @@ while (cs < slices) :
 				print str(cs) + " :" + filename_l + " - Degrees : " + str(a_deg*180/3.14) + " - "+str(percent) + "%"
 			if reconstruct_mode=="s":
 				print str(cs) + " :" + filename_l + " - Sweep no.  " + str(cs) + "/"+ str(slices) + " - " +str(percent) + "%"
-			#computer vision png preview is written.	
+			#computer vision jpg preview is written.	
 			cv2.imwrite(scan_dir + str(cs) +'_vision.png',or_difference)
 			
 		#next slice
 		cs+=1
+		os.remove(filename)
+		os.remove(filename_l)
 		#END SLICES CYCLE (end of this slice scan)
 		
 #Overall point cloud transformations, if needed
@@ -421,9 +424,6 @@ completed=1
 completed_time=float(time.time())
 percent=100
 printlog(percent,cs)
-
-if debug:
-	print "done, Elapsed time: " + str(delta_t) 
 	
 #finalize database-side operations
 call (['sudo php /var/www/fabui/script/finalize.php '+str(task_id)+" scan_"+reconstruct_mode], shell=True)
